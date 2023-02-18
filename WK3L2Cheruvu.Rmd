@@ -1,0 +1,288 @@
+---
+title: "Data Manipulation of Heart Disease Data"
+author: "Advaith Cheruvu"
+date: "9/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importance of Study
+
+Heart disease has become the leading cause of death in the United States, causing approximately 1 in 4 deaths. The deadliest form of heart disease is coronary artery disease (CAD), responsible for approximately 16% of the world's deaths. By analyzing symptoms of CAD and other heart diseases, doctors can make better decisions about preventative measures against heart disease and potentially save millions of lives. Thus, the data preparation done in this document is extremely important to the combating heart disease.
+
+## Angina Pectoris and Heart Disease
+BioMedEd, Inc. has provided data from a study done of 304 patients that exhibited angina pectoris. Before cleaning the data, it is important to know the background behind the data. Angina pectoris is often described by patients as a squeezing or tightness in their chest. The problem for doctors is that angina is relatively common and is hard to distinguish between other types of chest pain, unrelated to heart disease. There are different types of anginas, including stable, unstable, Prinzmetal's angina, and microvascular angina. 
+
+## Stable Anginas
+
+Stable angina develops when your heart has to work harder, usually during exercise. This type of pain can be predicted and feels similar to previous chest pains. Though the severity and duration can vary, stable anginas are usually short and dissipates quickly when resting. Stable anginas usually don't require a medical emergency. If new symptoms occur severity/duration increases, it may signal an unstable angina or heart attack. 
+
+## Unstable Anginas
+
+Unstable anginas require a medical emergency since it may signal a heart attack. Unstable anginas are unexpected and are usually more severe than stable anginas. Occurring even at rest, unstable anginas can strike at any time and getting appropriate treatement immediately is very important.
+
+## Prinzmetal's Angina
+
+Prinzmetal's angina (also called variant angina) is caused by spasms in a patient's coronary arteries that temporarily decrease blood flow. These spasms are usually more severe and occur at rest, making them very similar to unstable anginas. Angina medication may be required to dissipate the angina, and in certain cases hospitalization may also be required. 
+
+## Microvascular Angina
+
+Microvascular Angina is caused by spasms within small coronary arteries. Much like Prinzmetal's angina, these spasms temporarily restrict blood flow and can last longer than stable anginas. The pain associated with this type of angina may occur with shortness of breath, sleep problems, fatigue, and lethargy. 
+
+## Angina in Women
+
+Women may experience different symptoms that occur in men. Women may experience a stabbing pain instead of chest pressure and neck discomfort, both of which are not common symptoms in men. Since these symptoms are different, it may cause delays in seeking treatment.
+
+## Anginas in Relation to Heart Disease
+
+Anginas usually signal other heart diseases and can put individuals at risk of heart attacks and coronary heart disease. All anginas are caused by decreased blood flow to the heart, but the cause of the decrease in blood flow could be different. For example, the buildup of plaque on the sides of arteries can restrict blood flow to the heart. Blood clots can also restrict blood flow to the heart and cause an angina but most of the time it is fatty buildup. This fatty buildup (called atherosclerosis) can cause a multitude of problems outside of just anginas. Atherosclerosis puts individuals at risk of a heart attack, stroke, numbness, weakness, chest pain, and transient ischemic attacks (often called mini-strokes). This shows the importance of understand anginas and the underlying causes and risk factors. By the end of this document, doctors and medical professionals can analyze the data to better understand how different variables affect the onset and risk of developing an angina. 
+
+
+## Introduction to the Dataset
+
+As mentioned earlier, BioMedEd, Inc. has provided data from a study done of patients that exhibited angina pectoris (a common symptom of CAD), allowing data scientists to analyze this data and gain knowledge on certain patterns related to the causes of CAD and other heart diseases. However, to use the data, the data must be cleaned and prepared for exploratory data analysis (EDA). In this document, I will go through the steps taken to prepare the heart data for EDA.
+
+## Setting up Workspace and Installing Packages
+The code below shows the preparation of the workspace and cleaning up the environment, as well as installing and loading packages. "tidyverse" is an important package that includes "dplyr" which helps with data science work. Some of the organizational tools and commands from "dplyr" will be shown later. Note that the "install.packages("tidyverse")" line is commented because this package has already been installed on this machine. 
+```{r heartinstall, echo=TRUE}
+# Clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+source("myfunctions.R")
+#
+# install and load libraries
+# install.packages("tidyverse")
+library(tidyverse)
+```
+## Loading and Looking at Heart Data
+After reading the heart data into R studio, the data scientist can look at it using a variety of commands. The most important commands are "summary" which reports the quartile data, "str" which reports the type of data in the dataframe, and "names" which reports the names of the columns of data. 
+
+```{r heartdata, echo=TRUE}
+#
+# load heart data
+heart <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\dirtyHeart.csv",header=T)
+#
+# look at heart data
+names(heart)
+summary(heart)
+str(heart)
+dim(heart)
+class(heart)
+glimpse(heart)
+head(heart)
+```
+As you can see, these commands provide useful information about the quality of the data as well as what the data is.  
+
+## Replacing Column Names
+Based on the "names" command from earlier, the column names of the data in this dataset is very ambiguous. By using a "dplyr" command "rename" we can rename the columns so that it is easier to read.
+
+```{r renamecolumns, echo=TRUE}
+#
+# replacing column names
+heart <- rename(heart, "Age" = "age", "Sex" = "sex", "Chest Pain Type" = "cp", "Resting Blood Pressure" = "trestbps", "Cholesterol" = "chol", "Fasting Blood Sugar" = "fbs", "Resting EEG Results" = "restecg", "Maximum Heart Rate" = "thalach", "Angina by Exercise" = "exang", "ST Depression by Exerise" = "oldpeak", "ST Segment Slope" = "slope", "Major Vessels" = "ca", "Thalassemia" = "thal", "Heart Attack" = "target")
+```
+Though this looks complicated, all this is doing is converting the old ambiguous column names to something more understandable. 
+```{r renamedcolumns, echo=TRUE}
+#
+# renamed columns
+names(heart)
+```
+## Replacing missing data
+Most columns have missing data, either as "NA" or data that just doesn't make sense. We can check this by running the "summary" command which reports the number of NA's in a column.
+
+```{r heartsummary1, echo=TRUE}
+summary(heart)
+```
+To fix this with numerical data, we can replace the NA's with the average of the whole column (excluding NA's). 
+
+```{r replaceNumericalData, echo=TRUE}
+#
+# replace missing age data
+heart$Age <- ifelse(is.na(heart$Age), round(mean(heart$Age, na.rm=TRUE),0), heart$Age)
+heart$Age <- ifelse(heart$Age == 0, round(mean(heart$Age, na.rm=TRUE),0), heart$Age)
+#
+# replace Resting Blood Pressure data
+heart$`Resting Blood Pressure` <- ifelse(is.na(heart$`Resting Blood Pressure`), round(mean(heart$`Resting Blood Pressure`, na.rm=TRUE),0), heart$`Resting Blood Pressure`)
+#
+# replace cholesterol data
+heart$Cholesterol <- ifelse(is.na(heart$Cholesterol), round(mean(heart$Cholesterol, na.rm=TRUE),0), heart$Cholesterol)
+#
+# replace Maximum Heart Rate data
+heart$`Maximum Heart Rate` <- ifelse(is.na(heart$`Maximum Heart Rate`), round(mean(heart$`Maximum Heart Rate`, na.rm=TRUE),0), heart$`Maximum Heart Rate`)
+#
+# replace ST Depression by Exercise data
+heart$`ST Depression by Exerise` <- ifelse(is.na(heart$`ST Depression by Exerise`), round(mean(heart$`ST Depression by Exerise`, na.rm=TRUE),0), heart$`ST Depression by Exerise`)
+#
+# replace Major Vessels data
+heart$`Major Vessels` <- ifelse(is.na(heart$`Major Vessels`), round(mean(heart$`Major Vessels`, na.rm=TRUE),0), heart$`Major Vessels`)
+
+```
+It should be noted that for age, there were a few observations with an age of 0 which does not make sense in the context of the collected data, so we must replace those values with the mean as well. Some of the non-numerical variables had only 2 levels, which means that I could input the most common level in place of the NA's. This can be done for "Sex" data, "Fasting Blood Sugar" data, "Angina by Exercise" data, and "Heart Attack" data. 
+
+```{r 2LevelData, echo=TRUE}
+#
+# replace sex data
+heart$Sex <- ifelse(is.na(heart$Sex), round(mean(heart$Sex, na.rm=TRUE),0), heart$Sex)
+#
+# replace Fasting blood sugar data
+heart$`Fasting Blood Sugar` <- ifelse(is.na(heart$`Fasting Blood Sugar`), round(mean(heart$`Fasting Blood Sugar`, na.rm=TRUE),0), heart$`Fasting Blood Sugar`)
+#
+# replace Angina by Exerise data
+heart$`Angina by Exercise` <- ifelse(is.na(heart$`Angina by Exercise`), round(mean(heart$`Angina by Exercise`, na.rm=TRUE),0), heart$`Angina by Exercise`)
+#
+# replace Heart Attack data
+heart$`Heart Attack` <- ifelse(is.na(heart$`Heart Attack`), round(mean(heart$`Heart Attack`, na.rm=TRUE),0), heart$`Heart Attack`)
+
+```
+
+For the remaining variables ("Chest Pain Type", "Resting EEG Results", "ST Segment Slope", and "Thalessemia") a different approach was taken to fix the missing data. With more than 2 levels, the NAs were just omitted from the dataframe. 
+
+```{r >2LevelData, echo=TRUE}
+#
+# removing remaining data
+heart <- na.omit(heart)
+```
+With more than 2 possible options for the missing data, it would be reasonably unfair to assign the missing data to the most common option. Now we can check the dimensions of the dataset.
+
+```{r heartdim, echo=TRUE}
+dim(heart)
+```
+
+## Changing Values Within Columns
+The data found in each column is also ambiguous and must be dealt with. For example, changing the "Sex" values to "male" and "female" instead of "1" and "0".
+
+```{r changingValues, echo=TRUE}
+#
+# Changing Sex values
+heart$Sex<-ifelse(heart$Sex== 1,"Male","Female")
+#
+# Changing Chest Pain values
+heart$`Chest Pain Type`<- ifelse(heart$`Chest Pain Type`== 1,"typical angina",
+    ifelse(heart$`Chest Pain Type`== 2, "atypical angina",
+    ifelse(heart$`Chest Pain Type`== 3, "non-anginal pain", 
+    ifelse(heart$`Chest Pain Type`== 4, "asymptomatic", heart$`Chest Pain Type`))))
+#
+# Changing fasting blood sugar values
+heart$`Fasting Blood Sugar`<-ifelse(heart$`Fasting Blood Sugar`== 1,"High","Low")
+#
+# Changing resting EEG values
+heart$`Resting EEG Results`<- ifelse(heart$`Resting EEG Results`== 0,"normal",
+    ifelse(heart$`Resting EEG Results`== 1, "ST-T wave abnormality", 
+    ifelse(heart$`Resting EEG Results`== 2, "ventricular hypertrophy", heart$`Resting EEG Results`)))
+#
+# Changing exercise induced angina values
+heart$`Angina by Exercise`<-ifelse(heart$`Angina by Exercise`== 0,"no","yes")
+#
+# Changing ST Segment Slope values
+heart$`ST Segment Slope`<- ifelse(heart$`ST Segment Slope`== 0,"upsloping",
+                                     ifelse(heart$`ST Segment Slope`== 1, "flat", 
+    ifelse(heart$`ST Segment Slope`== 2, "downsloping", heart$`ST Segment Slope`)))
+#
+# Changing Thalassemia values
+heart$Thalassemia <- ifelse(heart$`Thalassemia`== 3,"normal",
+                           ifelse(heart$`Thalassemia`== 6, "fixed defect", 
+                            ifelse(heart$Thalassemia ==7, "reversible defect", heart$Thalassemia)))
+#
+# Changing Heart Attack values
+heart$`Heart Attack`<- ifelse(heart$`Heart Attack`== 1, "yes", "no")
+
+```
+
+Now we can check if the data is readable
+
+```{r hearthead, echo=TRUE}
+head(heart)
+```
+
+## Grouping By Hypertension
+Using the completed dataset we can manipulate the data using "dplyr" commands. For example, we can add a variable for hypertension. This is useful for doctors and medical professionals because hypertension is a risk factor for many heart diseases and can work in conjunction with angina pectoris to help doctors diagnose severe heart diseases. Also, since hypertension only requires a person's blood pressure, we can easily determine whether someone has hypertension based upon the "Resting Blood Pressure" values. I will be using 140 mm Hg as the cutoff value for hypertension. Those with a resting blood pressure of greater than 140 mm Hg will be marked as "yes" for having hypertension and those with a resting blood pressure of less than 140 mm Hg will be marked as "no" for not having hypertension.
+
+```{r hypertension, echo=TRUE}
+#
+# adding a variable for hypertension based on resting blood pressure
+heart <- mutate(heart, Hypertension = factor(1 * (heart$`Resting Blood Pressure` >= 140), labels = c("no", "yes")))
+```
+
+We can now check to make sure this new variable has been implemented by using the "names" command
+
+```{r hypertensionNames, echo=TRUE}
+names(heart)
+```
+
+Using this new variable, we can group the data based on hypertension to observe some basic patterns related to those with hypertension. This code below tells us the mean age, mean cholesterol, and mean maximum heart rate of those with or without hypertension.
+
+```{r hypertensionGroup, echo=TRUE}
+# 
+# grouping data based upon hypertension
+hypertensionGroup <- group_by(heart, Hypertension)
+summarize(hypertensionGroup, Age = mean(Age), Cholesterol = mean(Cholesterol))
+
+```
+
+This is especially useful for doctors and medical professionals because we can see that those with hypertension tend to be slightly older and have higher cholesterol. This puts those with hypertension at a high risk for heart disease, more so than with previously thought because of the other trends associated with those with hypertension. 
+
+## Arranging By Age
+It may be useful to arrange the dataset by ascending cholesterol since angina pectoris is primarily caused by cholesterol blocking the coronary arteries. This way, we can look for patterns in the data as the cholesterol increases.
+
+```{r arrangeCholesterol, echo=TRUE}
+#
+# arranging data by increasing Cholesterol 
+heart <- arrange(heart, Cholesterol)
+
+```
+
+This can be done for other variables that may prove to be useful. For example, we can order the dataset by maximum heart rate, age, or  resting blood pressure to see different patterns related to how prevalent angina is in different types of patients and what kind. 
+
+## Filtering and Selecting Based on Different Variables
+
+The data that was given contains many people that didn't have typical angina pain. To reveal the patterns of why this is the case, we must filter out the people with typical angina pain to work with those who are different. 
+
+```{r filterAngina, echo=TRUE}
+#
+# filtering Chest Pain Type data
+nonTypicalAngina <-filter(heart, 'Chest Pain Type' != "typical angina")
+#
+# viewing nonTypicalAngina
+head(nonTypicalAngina)
+```
+
+Doctors and medical professionals can also analyze the EEG results in conjunction with the pain type. To prepare the data for such analysis, we can isolate those two variables using this code.
+
+```{r painTypeEEG, echo=TRUE}
+#
+# Selecting chest pain type and EEG results data
+painTypeEEGResults <- select(heart, `Chest Pain Type`, `Resting EEG Results`)
+
+```
+
+We can also isolate people based on the values of variables. For example, it would be useful for doctors and medical professionals if we were to isolate a group of highly vulnerable individuals. so that we could analyze their medical information. The code below isolates those who have a cholesterol higher than 272 and a resting blood pressure higher than 140. These numbers came from the 3rd quartile of variables, which can be seen from the summary function.
+
+```{r highCholBP, echo=TRUE}
+summary(heart$`Resting Blood Pressure`)
+summary(heart$Cholesterol)
+#
+# filtering cholesterol and resting blood pressure data
+highCholBP <-filter(heart, Cholesterol >= 273 & heart$'Resting Blood Pressure' >= 140)
+dim(highCholBP)
+highCholBP
+```
+
+As you can see, there are 28 high risk individuals with higher cholesterol and blood pressure. By isolating these people, we can analyze some other shared variables to determine potential causes of angina pectoris and assess the risk of those who don't have a higher cholesterol and blood pressure. By grouping, filtering, and selecting certain data, we prepare the data for analysis. 
+
+## Work Cited
+
+“Angina (Chest PAIN).” Www.heart.org, American Heart Association, 2021, www.heart.org/en/health-topics/heart-attack/angina-chest-pain.  
+  
+“Angina.” Mayo Clinic, Mayo Foundation for Medical Education and Research, 12 June 2020, www.mayoclinic.org/diseases-conditions/angina/symptoms-causes/syc-20369373.  
+  
+“Atherosclerosis.” National Heart Lung and Blood Institute, U.S. Department of Health and Human Services, 2021, www.nhlbi.nih.gov/health-topics/atherosclerosis.  
+  
+“Facts about Hypertension.” Centers for Disease Control and Prevention, Centers for Disease Control and Prevention, 19 July 2021, www.cdc.gov/bloodpressure/facts.htm.  
+  
+“Heart Disease.” Centers for Disease Control and Prevention, Centers for Disease Control and Prevention, 19 Jan. 2021, www.cdc.gov/heartdisease/index.htm.  
+  
+“The Top 10 Causes of Death.” World Health Organization, World Health Organization, 9 Dec. 2020, www.who.int/news-room/fact-sheets/detail/the-top-10-causes-of-death. 
+

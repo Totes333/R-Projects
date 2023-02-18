@@ -1,0 +1,255 @@
+---
+title: "U.S. Crimes Data Visualization"
+author: "Advaith Cheruvu"
+date: "10/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importance of Study
+
+Criminal offenses have been increasing as of late, causing damage to public security and social order. Often, this damage is thought of as the result of the crime, including personal property theft, victim injury, and others. But also, these crimes often lead to uncertainty in the local and national government being able to keep their people safe and secure. To combat these problems, the government must focus funding on law enforcement, emergency response, and other related public safety measures. This way, crime decreases and the people are better protected. However, With government's limited resources, it begs the question, which areas need the most support? Knowing the states that have the highest crime rates will help the government focus funding. Also, knowing the types of crimes that these states are most often faced with can help the government focus funding. For example, property crimes and larceny yield less severe consequences than murder and and rape, allowing the national government to focus funding on the states with more severe crimes. Finally, understanding relationships that result in crimes will help the government focus funding on the states that most require crime prevention measures. 
+
+
+## Crime in relation to COVID-19
+
+The COVID-19 pandemic has caused economic and mental distress for many individuals, causing some of them to turn to crime. Even before the pandemic, crimes were mainly focused in urban centers. As the pandemic rolled through, these urban areas were more deeply affected than their rural and suburban counterparts. This means that the already crime-ridden urban regions had even worse crime rates. These changes have further exacerbated the issue and brings more importance to the analysis of crime data. 
+
+
+## Setting up Workspace and Installing Packages
+The code below shows the preparation of the workspace and cleaning up the environment, as well as installing and loading packages.
+
+
+![](C://Users//advai//Documents//DSFS//setup1.png)
+
+
+```{r install, include=FALSE}
+#
+# clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+#
+# install and load libraries
+library(tidyverse)
+library(ggdendro)
+library(ggalt)
+library(plotluck)
+library(gridExtra)
+source("myfunctions.R")
+source("theme_map.R")
+```
+
+## Loading and Looking at Crimes and US States Data
+
+Eventually these datasets will be combined, but the crimes data requires some minor cleaning.
+
+
+```{r loadData, echo=TRUE}
+#
+# load crimes data
+crimes <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\newCrimes.csv",header=T)
+#
+# looking at crime data
+names(crimes)
+summary(crimes)
+dim(crimes)
+class(crimes)
+head(crimes)
+#
+# Looking at US States data
+us_states<-map_data("state")
+head(us_states)
+dim(us_states)
+summary(us_states)
+```
+
+
+## Creating New Variables
+
+The "Property_Per10k" variable was created to compare the property crime rate for various states. The "Murder_Per10k" variable was created to compare the murder rate for various states. Property crime can be considered less impactful than murder, meaning that I can analyze which states require more government support, based more heavily on the murder rate than property crime rate. Finally, the "PopInMil" variable simply converts the population number to the population in millions to allow the graphs to be easier to read. 
+
+
+```{r newVariables, echo=TRUE}
+#
+# Creating a new variable for property per 10k
+crimes$Property_Per10k <- (crimes$Property/crimes$Population) * 10000
+#
+# Creating a new variable for murders per 10k
+crimes$Murder_Per10k <- (crimes$Murder/crimes$Population) * 10000
+#
+# Creating a new variable for population in millions
+crimes$PopInMil <-(crimes$Population/1000000)
+
+```
+
+
+## Merging Datasets
+
+Merging the datasets allows R to associate the crime data with the states, thus allowing me to create visualizations.
+
+```{r mergeData, echo=TRUE}
+#
+# Merging us_states and crimes
+crimes$region <- tolower(crimes$State)
+us_crimes<- left_join(us_states, crimes)
+summary(us_crimes)
+us_crimes$Per10K <- as.numeric(us_crimes$Per10K)
+```
+
+
+## Visualizations
+
+I will be mainly creating maps since this main point of this data analysis is to determine which states need government support. This means that spatial organization found in a map will be helpful. 
+
+## Map of Crime Rate per 10,000 People
+
+I will first create a map of crime committed per 10,000 people. This will give a general idea of the crime rates, giving us a basic answer to which states require the most government support.
+
+```{r per10k, echo=TRUE}
+##
+# Creating map of crime rates
+per10kMap <-
+  ggplot(data=us_crimes,
+  mapping=aes(x=long, y=lat, group=group, fill=Per10K)) + # maps aesthetics
+  scale_fill_continuous(low = "white", high="red") + # color scale
+  geom_polygon(color="black", size=0.08) + # creates border aesthetics
+  coord_map(projection="albers", lat0=30, lat1=45) + # albers projection
+  labs(title="Crimes committed per 10,000 people", fill="Crime Rate") + # title and legend
+  theme_map()
+#
+# Print the per10k map
+per10kMap
+
+```
+
+This map shows that Nevada and New Mexico stand out. This means that more people per 10,000 commit crimes in Nevada and New Mexico than in other states. These states would need general support from the government, but we do not know which crimes occur in these states, only that there are more crimes in these states.
+
+## Map of Murders
+
+Next, I'll create a map showing where murders happen in the U.S. This will informs us which states have the most murders. This violent crime provides a comparison between murder and larceny (the next map), allowing us to cross reference the states that are high in these crimes.
+
+```{r murders, echo=TRUE}
+#
+# Creating a map of murders
+murdersMap <-
+  ggplot(data=us_crimes,
+         mapping=aes(x=long, y=lat, group=group, fill=Murder)) + # maps aesthetics
+  scale_fill_continuous(low = "white", high="red") + # color scale
+  geom_polygon(color="black", size=0.08) + # creates border aesthetics
+  coord_map(projection="albers", lat0=30, lat1=45) + # albers projection
+  labs(title="Murders Committed Across the U.S.", fill="Murders") + # title and legend
+  theme_map()
+#
+# Print the murdersMap
+murdersMap
+
+```
+
+According to the map, California, Texas, and Florida seem to have the highest amount of murders. This indicates that the government can focus police investigation and organized crime prevention in these states. Also, it should come as no coincidence that these states have the highest population due to number of cities. Therefore, this graph gives us an idea of the relationship between population and murders.
+
+## Map of Larceny
+
+To contrast the murder map, This range from murder to larceny gives the perspective of scale. A smaller scale crime, such as larceny, may provide different patterns from a larger scale crime, such as murder.
+
+```{r larcenyMap, echo=TRUE}
+#
+# Creating a map of Larceny
+larcenyMap <-
+  ggplot(data=us_crimes,
+         mapping=aes(x=long, y=lat, group=group, fill=Larceny)) + # maps aesthetics
+  scale_fill_continuous(low = "white", high="red") + # color scale
+  geom_polygon(color="black", size=0.08) + # creates border aesthetics
+  coord_map(projection="albers", lat0=30, lat1=45) + # albers projection
+  labs(title="Larceny Committed Across the U.S.", fill="Larceny") + # title and legend
+  theme_map()
+#
+# Print the larcenyMap
+larcenyMap
+
+```
+
+This map shows that larceny was most often committed in California, Texas, and Florida, which supports idea that more urban centers relates to more crime. Except for some minor changes most states have similar relative murder rates and larceny rates, meaning that the population and urban centers could affect the crime rate across the scale of the crime.
+
+## Property Crimes Rate Map
+
+Property crimes are another small scale crime which gives us the information about how much small scale crime each state has. This will provide a comparison between the states, allowing the government to focus funding on basic security measures that are tailored towards property crimes. 
+
+```{r propertyPer10k, echo=TRUE}
+#
+# Creating a map of Property_Per10k
+propertyPer10KMap <-
+  ggplot(data=us_crimes,
+         mapping=aes(x=long, y=lat, group=group, fill=Property_Per10k)) + # maps aesthetics
+  scale_fill_continuous(low = "white", high="red") + # color scale
+  geom_polygon(color="black", size=0.08) + # creates border aesthetics
+  coord_map(projection="albers", lat0=30, lat1=45) + # albers projection
+  labs(title="Property Crimes Committed per 10,000 People", fill="Property Crime Rate") + # title and legend
+  theme_map()
+#
+# Print the Property_Per10k
+propertyPer10KMap
+
+```
+
+This map shows that most U.S. states have around the same property crime rate, though the southeast coast has considerably higher property crime rates. Also, it should be noted that Washington State has the highest property crime rate. More analysis is needed to determine exactly why this is the case, though I can speculate that it may be due to the fact that this state has a higher share of the population in cities vs rural and suburban areas. Also, Minnesota has an extremely low property crime rate. Again, more analysis is needed to discover exactly why, but the tactics Minnesota is using to prevent property crime may be applied elsewhere for similar success.
+
+## Murder Rate Map
+
+The murder rate map can be used to compare to the property crime map to determine how a change in the scale of the crime can affect its prevalence and could perhaps indicate different patters across the scale.
+
+```{r lm1, echo=TRUE}
+#
+# Create a map of Murders_per10k
+murders_per10KMap <-
+  ggplot(data=us_crimes,
+         mapping=aes(x=long, y=lat, group=group, fill=Murder_Per10k)) + # maps aesthetics
+  scale_fill_continuous(low = "white", high="red") + # color scale
+  geom_polygon(color="black", size=0.08) + # creates border aesthetics
+  coord_map(projection="albers", lat0=30, lat1=45) + # albers projection
+  labs(title="Murders Committed per 10,000 People", fill="Murder Rate") + # title and legend
+  theme_map()
+#
+# Print the Property_Per10k
+murders_per10KMap
+```
+
+This map yields some particularly interesting results. Firstly, the murder rate varies much more than the property crime rate. I suspect this may be due to the fact that number of murders was much less than the number of property crimes, meaning that a single murder would affect the murder rate much more than the property crime affecting the property rate. Also, where Washington state had the highest property crime rate, it now has one of the lowest murder rates, meaning that crimes of different scales can be committed with different rates. Also, Louisiana, Mississippi, and Missouri seem to have the highest murder rates. This, along with the fact that the south in general has a higher murder rate could indicate that murder rates are not only affected by city amount and distribution. More analysis is required to determine exactly why these states exhibit these patterns. The national government can focus more on funding investigative work in the south and specifically Missouri, Louisiana, and Mississippi. 
+
+## Population and Annual Crimes Scatter Plot
+
+Finally, this last plot shows the relationship between annual crimes and population. Though it seems obvious that a higher population would mean that more criminals would be part of the population, this plot can provide valuable information about states that are above or below the average.
+
+```{r sp, echo=TRUE}
+#
+# Scatterplot between population and annual crimes
+popCrimesPlot <- ggplot(us_crimes, aes(x=PopInMil,                     # sets the x to population
+                          y=Annual))+          
+  geom_point() +                                      # tells R to create a scatter plot
+  xlab("Population (Millions)") +                     # labels the x axis
+  ylab("Annual Crimes") +                                    # labels the y axis
+  ggtitle("Scatterplot of population\n and annual crimes") +  # labels the plot
+  theme(plot.title = element_text(hjust = 0.5)) +            # centers the title
+  geom_smooth(method=lm, color="red")                        # colors the linear regression line red
+  
+# Prints the plot
+popCrimesPlot 
+```
+
+The states below the linear regression line are the states that have the lowest amount of annual crimes for their population. These are the states that can be used as exemplars for other states to reduce their annual crimes. Similar policies from these states can be used in the states that aren't using the policies and other similar traits can be extracted with more analysis.
+
+## Work Cited
+
+“Crime.” Legal Information Institute, Legal Information Institute, 2021, www.law.cornell.edu/wex/crime.
+
+“The Impact of Crime.” From Pain to Power: The Impact of Crime, Office for Victim Clinic, 2021, www.ncjrs.gov/ovc_archives/reports/fptp/impactcrm.htm.
+
+Justice., Council on Criminal. “NCCCJ - Impact Report: Covid-19 and Crime.” National Commission on COVID-19 and Criminal Justice, National Commission on COVID-19 and Criminal Justice, 21 May 2021, covid19.counciloncj.org/2021/05/21/impact-report-covid-19-and-crime-4/.
+
+Walden University. “Why-National-Crime-Statistics-Are-Important.” Walden University, Walden University, 25 Mar. 2021, www.waldenu.edu/online-bachelors-programs/bs-in-criminal-justice/resource/why-national-crime-statistics-are-important. 
+
+
+
+

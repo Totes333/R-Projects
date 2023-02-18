@@ -1,0 +1,126 @@
+---
+title: "Chicago Weather Data Preparation and Analysis"
+author: "Advaith Cheruvu"
+date: "8/31/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+library(rmarkdown)
+render("W2L2Cheruvu.Rmd", output_format = "pdf_document")
+## Abstract
+
+This report analyzes the weather data for Chicago from January 1987 to December 2005. The measured weather parameters were daily temperature (degrees Celsius), dewpoint (degrees Celsius), amount of PM2.5, amount of PM10, amount of ozone, and amount of nitrogen trioxide. Data munging, cleaning and normalization were done in order to prepare the dataset for further analysis. Histograms of numerical data were made.
+
+## Clean up and Set up
+Before importing the data, the workspace must be cleared and the working directory must be set up.
+```{r include=TRUE}
+# Clearing the workspace and setting the working directory
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+```
+## Obtaining Functions and Installing Packages
+"myfunctions.R" is necessary for some of the later code to run. "tidyverse" has useful tools that help with plotting and transforming data.
+```
+# install and load libraries
+source("myfunctions.R")
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+## Loading and Overviewing the Weather Data
+Before cleaning the data, we must know what the dataset includes. The "names" command shows the names of the columns. The "summary" command gives a short summary of each column. The "str" command shows the type of data in each column. The "dim" command shows the number of columns and rows in the dataset. The "class" command shows that weather is a data frame.
+```{r weatherOverview, echo=TRUE}
+# load weather data
+weather <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\chicago.csv",header=T)
+# overview of the data set
+names(weather)
+summary(weather)
+str(weather)
+dim(weather)
+class(weather)
+
+```
+
+## Removing Columns
+The index and city data in this dataset is unecessary so we must remove those columns.
+```
+# removing index and city columns
+weather <- select(weather, -1:-2)
+names(weather)
+```
+![](C://Users//advai//Documents//DSFS//removingcolumns.png)
+## Renaming Columns
+Some of the columns are ambigous or hard to read. Using these commands, we can rename them to something more readeable.
+```
+# renaming columns
+colnames(weather)<-c("Temp", "Dewpoint","Date","PM25","PM10","O3","NO3")
+names(weather)
+
+```
+![](C://Users//advai//Documents//DSFS//renamedColumns.png)
+
+## Changing the Date Format
+The date format is a character instead of a number. using these commands, we can change the date to a number, as well as make it more readable.
+```
+# Changing the date format
+weather$Date <- as.Date(weather$Date, format= "%m/%d/%y")
+```
+
+## Normalizing the PM data
+The PM data is missing some values and it should be normalized (on a scale of 0-1) to prepare it for data analysis. This applies to both PM2.5 and PM10.
+```
+# Normalizing PM25 Data
+weather$PM25 <- ifelse(is.na(weather$PM25), round(mean(weather$PM25, na.rm=TRUE),3), weather$PM25)
+PM25.normalize <- weather$PM25/max(weather$PM25)
+weather$PM25 <- PM25.normalize
+# Normalizing PM10 Data
+weather$PM10 <- ifelse(is.na(weather$PM10), round(mean(weather$PM10, na.rm=TRUE),3), weather$PM10)
+PM10.normalize <- weather$PM10/max(weather$PM10)
+weather$PM10 <- PM10.normalize
+```
+
+## Taking out numeric data
+To prepare the data for analysis, we must provide the columns with numeric data. These commands seperate the numerica data (all the columns except for the date).
+```
+# Naming and removing numeric data
+numerics <- weather[,c(1:2,4:7)]
+```
+## Observing Correlation
+This is pairwise correlation which helps to find out which data pairs have recognizeable patterns and are worth analyzing further.
+```
+# Looking at Correlation
+pairs(numerics,upper.panel = panel.cor,diag.panel = panel.hist)
+```
+![](C://Users//advai//Documents//DSFS//pairs.png)
+
+## Histograms
+As part of Exploratory Data Analysis (EDA), transformations must be made to the data to normalize it and compare it to other data. This transformation is the rank z transformation which results in a normal distribution. This can be seen for all graphs except for PM25 where the correlation is not as strong.
+```
+# Transformations and histogram plots
+Temp.rz <- rz.transform(weather$Temp)
+hist(Temp.rz)
+Dewpoint.rz <- rz.transform(weather$Dewpoint)
+hist(Dewpoint.rz)
+PM25.rz <- rz.transform(weather$PM25)
+hist(PM25.rz)
+PM10.rz <- rz.transform(weather$PM10)
+hist(PM10.rz)
+O3.rz <- rz.transform(weather$O3)
+hist(O3.rz)
+NO3.rz <- rz.transform(weather$NO3)
+hist(NO3.rz)
+```
+![](C://Users//advai//Documents//DSFS//temprz.png)
+![](C://Users//advai//Documents//DSFS//dewpointrz.png)
+![](C://Users//advai//Documents//DSFS//pm25rz.png)
+![](C://Users//advai//Documents//DSFS//pm10rz.png)
+![](C://Users//advai//Documents//DSFS//o3rz.png)
+![](C://Users//advai//Documents//DSFS//no3rz.png)
+
+

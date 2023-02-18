@@ -1,0 +1,478 @@
+---
+title: "Data Cleaning and Analysis of Cervical Cancer Data"
+author: "Advaith Cheruvu"
+date: "9/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importance of Study
+
+There will be an estimated 14,480 new cases of invasive cervical cancer will be diagnosed and about 4,290 of these women will die from cervical cancer in 2021. This, along with the fact that cervical cancer is frequently diagnosed between the ages of 35-44, shows the importance of studying this disease. As patterns emerge from analyzing the data from susceptible women, we can adapt our health care system to better prevent and treat cervical cancer. For example, by knowing the risk factors, doctors can steer susceptible women away from the risk factors as a measure of prevention. Also, we can critique our current cancer diagnosis techniques so that we know which tests are the most effective and if the medical community needs to develop more accurate tests.
+
+## Overview  of Cervical Cancer
+
+Cervical cancer is a type of cancer that occurs in a woman's cervix. The main cause of cervical cancer is the human papilomavirus (HPV). Cervical cancer has 2 main types: squamous cell carcinoma and adenocarcinoma. Squamous cell carcinoma begins in the thin flat cells that line the outer part of the cervix. Most cases of cervical cancer are squamous cell carcinomas. Adenocarcinoma begins in the column-shaped glandular cells lining the cervical canal. Both of these forms of cervical cancer produce similar symtoms. Early stages generally have no signs or symptoms, but more advanced cervical cancers may include vaginal bleeding after intercourse, water/bloody vaginal discharge, and pelvic pain or pain during intercourse. Once these symptoms present themselves, the cancer would have already started spreading to nearby tissue and forming a tumor. Eventually, if left untreated, the cancer can spread to the bladder, intestines, bones, lymphnodes, lungs, and liver, leading to death.
+
+## HPV
+
+HPV is the main cause of cervical cancer, but it may lie dormant for years before becoming active. Women may contract HPV from sexual intercourse, which may develop into cervical cancer. HPV is very common with at least half of sexually active people contracting it, but only relatively few women will get cervical cancer. In fact, most HPV cases clear within a few months without any intervention and 90% clear within 2 years. The other 10% of cases, however, have a high risk of progressing into cervical cancer. Preventing the transmission and damage done by this STD is crucial to preventing cervical cancer. 
+
+## Prevention: Vaccination
+
+There are currently 3 vaccines that protect against HPV 16 and HPV 18. This strands are known to cause at least 70% of cervical cancers. The third vaccine protects against 5 additional types of oncogenic HPV strands, which cause another 20% of cervical cancers. Also, two of the vaccines protect against HPV 6 and HPV 11, which are known to cause anogenital warts. These vaccines are best adminstered prior to the exposure of HPV, which is the reasoning behind vaccinating girls aged 9 to 14, before most have started sexual activity. These vaccines cannot treat an ongoing HPV infection or HPV-associated diseases. Though these vaccines are effective, it does not replace cervical cancer screenings.
+
+## Prevention: Screening
+
+Cervical cancer screenings involve testing for pre-cancer and cancer in healthy women who have no symptoms. When screenings detect an HPV infection or pre-cancerous lesions, they can be easily treated and the risk of cancer can be avoided. Even screenings that detect cancer at an early stage has a high potential for effective treatment and cure. Screening is recomended for women aged 30 at regular intervals since HPV takes may take many years to progress.
+
+## Prevention: Abstinence
+
+Since HPV is a sexually transmitted disease (STD), abstinence is the most effective prevention measure against HPV and cervical cancer. Limiting sexual partners and maintaining sexual activies in a long-term monogamous relationship reduces the risk of spreading HPV. Safe, protective sex can also reduce the risk of spreading HPV, but the other methods discussed earlier are more effective since HPV spreads very quickly during sexually intercourse.
+
+## Hinselmann Test
+
+The Hinselmann test tests for cervical cancer by examining cells on colposcope. The colposcope gathers a sample of cells from the cervix and tests for cancerous growths. This test can diagnose cervical cancer and is done if the patient is showing symptoms or suspected to have cervical cancer based on the discretion of the personal care provider.
+
+
+
+## Schiller Test
+
+The Schiller test tests for cervical cancer by applying iodine to the cervix. The iodine stains healthy cells brown, leaving abnormal cells unstained, usually appearing white or yellow. This test is mainly for larger, more noticeable cancer, allowing doctors to confirm the diagnosis of cervical cancer. 
+
+## Cytosis
+
+The cytology test includes a pap test or pap smear where the physician will gently remove cells from the cervix so that they may be checked under a microscope. Pap smears are the most common form of screening/diagnosing for cervical cancer due to the cost and ease of the procedure. 
+
+## Biopsy
+
+A cervical biopsy remove a sample of tissue for testing using a variety of techniques to obtain the sample. Punch biopsy uses a circular blade to obtain a hole-shaped piece of tissue, cone biopsy uses a laser or scalpel to remove a cone-shaped piece of tissue, and endocervical curettage (ECC) uses a curette to scape the inner lining of the endocervical canal.
+
+## Introduction to the Dataset
+
+As mentioned earlier, cervical cancer is important to study; especially the data associated with susceptible women. The dataset I will be analyzing will be from the 8th Iberian Pattern Recognition and Image Analsis Conference. This dataset studied 858 women and some of the symptoms and behaviors of women that put them at risk cervical cancer or other similar diseases. I will go through the steps I took to clean and analyze the data.
+
+
+## Setting up Workspace and Installing Packages
+The code below shows the preparation of the workspace and cleaning up the environment, as well as installing and loading packages. "tidyverse" is an important package that includes "dplyr" which helps with data science work. Some of the organizational tools and commands from "dplyr" will be shown later. Note that the "install.packages("tidyverse")" line is commented because this package has already been installed on this machine. 
+
+```{r install, echo=TRUE}
+#
+# Clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+#
+# install and load libraries
+library(tidyverse)
+library(stringr)
+source("myfunctions.R")
+```
+
+## Loading and Looking at Cervical Cancer Data
+After reading the cervical cancer data into R studio, I can look at it using a variety of commands. The most important commands are "summary" which reports the quartile data, "str" which reports the type of data in the dataframe, and "names" which reports the names of the columns of data. Also, the "na.strings" argument replaces the "?" characters with "NA" so that they are easier to work with when I replace missing data.
+
+
+```{r ccdata, echo=TRUE}
+#
+# load cervical cancer data
+cervicalCA <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\cervicalCA.csv",header=T, na.strings=c("?"))
+#
+# looking at the data
+names(cervicalCA)
+summary(cervicalCA)
+str(cervicalCA)
+dim(cervicalCA)
+class(cervicalCA)
+glimpse(cervicalCA)
+head(cervicalCA)
+```
+
+As you can see, these commands provide useful information about the quality of the data as well as what the data is.  
+
+## Replacing Column Names
+Based on the "names" command from earlier, the column names of the data in this dataset is very ambiguous. By using a "dplyr" command "rename" we can rename the columns so that it is easier to read.
+
+```{r renamecolumns, echo=TRUE}
+#
+# Cleaning up the column names
+names(cervicalCA) <- c("age", "sexual_partners","first_intercourse", "pregnancies", "smokes", "smoking_time", "smoke_rate", "hormomal_contraceptives", "hormonal_contraceptives_time", "iud", "iud_time", "std", "std_time", "condylomatosis", "cervical_condylomatosis", "vaginal_condylomatosis", "vulvo_perineal_condylomatosis", "syphilis", "pelvic_inflammatory_disease", "genital_herpes", "molluscum_contagiosm", "aids", "hiv", "hepatitis_b", "hpv", "diagnosis_num", "first_diagnosis_time", "last_diagnosis_time", "dx_cancer", "dx_cin", "dx_hpv", "dx", "hinselmann", "schiller", "cytology", "biopsy")
+
+```
+
+Though this looks complicated, all this is doing is converting the old ambiguous column names to something more understandable. 
+
+```{r renamedcolumns, echo=TRUE}
+#
+# renamed columns
+names(cervicalCA)
+```
+
+## Checking for Missing Data
+
+Most columns have missing data, either as "NA" or data that just doesn't make sense. I can check for missing data using the commands below which print the rows with missing data. After knowing that I have missing data, I can run the command below which tells me which columns have missing data.
+
+```{r CCsummary1, echo=TRUE}
+#
+# Check for missing data
+clean <- ifelse(complete.cases(cervicalCA) == TRUE, 1, 0)
+paste("There are", dim(cervicalCA)[1]-sum(clean), "rows with missing data.")
+#
+# Find which columns have missing data
+missingDataCol <-colnames(cervicalCA)[apply(cervicalCA, 2, anyNA)]
+paste0("The following columns have missing data: ", missingDataCol)
+
+```
+
+## Replacing Missing Data
+
+Most of this data is Boolean, so the logical replacement for missing data would be "0". However, for the numerical data, I can replace the missing values with the mean of the existing values.
+
+```{r replaceNumericalData, echo=TRUE}
+#
+# Replacing the missing data with the mean for 
+# appropriate columns
+# Replacing sexual partners data
+cervicalCA$sexual_partners <- ifelse(is.na(cervicalCA$sexual_partners), round(mean(cervicalCA$sexual_partners, na.rm=TRUE),0), cervicalCA$sexual_partners)
+#
+# Replacing first_intercourse data
+cervicalCA$first_intercourse <- ifelse(is.na(cervicalCA$first_intercourse), round(mean(cervicalCA$first_intercourse, na.rm=TRUE),0), cervicalCA$first_intercourse)
+#
+# Replacing pregnancies data
+cervicalCA$pregnancies <- ifelse(is.na(cervicalCA$pregnancies), round(mean(cervicalCA$pregnancies, na.rm=TRUE),0), cervicalCA$pregnancies)
+
+```
+
+Now I can replace the Boolean variables
+
+```{r booleanData, echo=TRUE}
+#
+# Replacing the other missing data with 0
+cervicalCA[is.na(cervicalCA)] = 0
+
+```
+
+## Other clean up
+
+After looking at the data after the prior changes, I noticed that some of the columns were in integers instead of Boolean. I also fixed the rounding issues that occurred when I replaced the missing numerical data with the mean.
+
+```{r otherCleanUp, echo=TRUE}
+#
+# Replacing integer data as boolean where appropriate
+logicals <- c("smokes", "iud", "std", "condylomatosis", "vaginal_condylomatosis", "vulvo_perineal_condylomatosis", "syphilis", "pelvic_inflammatory_disease", "genital_herpes", "molluscum_contagiosm", "aids", "hiv", "hepatitis_b", "hpv", "dx_cancer", "dx_cin", "dx_hpv", "dx", "hinselmann", "schiller", "cytology", "biopsy")
+cervicalCA[logicals] <- lapply(cervicalCA[logicals], as.logical)
+#
+# Round values in columns with many digits
+cervicalCA$smoking_time <- round(cervicalCA$smoking_time, 3)
+cervicalCA$smoke_rate <- round(cervicalCA$smoke_rate, 3)
+cervicalCA$hormonal_contraceptives_time <- round(cervicalCA$hormonal_contraceptives_time,3)
+
+```
+
+Now I can check my data set before I continue.
+
+```{r summaryCC, echo=TRUE}
+summary(cervicalCA)
+```
+
+## Normalizing data
+
+To get a feel for the data, I need to normalize the data. I used a rank z transform to normalize the data for analysis. I also added a column to the dataset for these values.
+
+```{r changingValues, echo=TRUE}
+#
+# Normal distribution of numerical data
+# Checking for age
+hist(rz.transform(cervicalCA$age))
+qqnorm(cervicalCA$age)
+qqline(cervicalCA$age)
+cervicalCA$rz_transform_age <- rz.transform(cervicalCA$age)
+#
+# Checking for sexual_partners
+hist(rz.transform(cervicalCA$sexual_partners))
+qqnorm(cervicalCA$sexual_partners)
+qqline(cervicalCA$sexual_partners)
+cervicalCA$rz_transform_sexual_partners <- rz.transform(cervicalCA$sexual_partners)
+#
+# Checking for first_intercourse
+hist(rz.transform(cervicalCA$first_intercourse))
+qqnorm(cervicalCA$first_intercourse)
+qqline(cervicalCA$first_intercourse)
+cervicalCA$rz_transform_first_intercourse <- rz.transform(cervicalCA$first_intercourse)
+#
+# Checking for pregnancies
+hist(rz.transform(cervicalCA$pregnancies))
+qqnorm(cervicalCA$pregnancies)
+qqline(cervicalCA$pregnancies)
+cervicalCA$rz_transform_pregnancies <- rz.transform(cervicalCA$pregnancies)
+#
+# Checking for smoking_time
+hist(rz.transform(cervicalCA$smoking_time))
+qqnorm(cervicalCA$smoking_time)
+qqline(cervicalCA$smoking_time)
+cervicalCA$rz_transform_smoking_time <- rz.transform(cervicalCA$smoking_time)
+#
+# Checking for smoke_rate
+hist(rz.transform(cervicalCA$smoke_rate))
+qqnorm(cervicalCA$smoke_rate)
+qqline(cervicalCA$smoke_rate)
+cervicalCA$rz_transform_smoke_rate <- rz.transform(cervicalCA$smoke_rate)
+#
+# Checking for hormonal_contraceptives_time
+hist(rz.transform(cervicalCA$hormonal_contraceptives_time))
+qqnorm(cervicalCA$hormonal_contraceptives_time)
+qqline(cervicalCA$hormonal_contraceptives_time)
+cervicalCA$rz_transform_hormonal_contraceptives_time <- rz.transform(cervicalCA$hormonal_contraceptives_time)
+#
+# Checking for iud
+hist(rz.transform(cervicalCA$iud))
+qqnorm(cervicalCA$iud)
+qqline(cervicalCA$iud)
+cervicalCA$rz_transform_iud <- rz.transform(cervicalCA$iud)
+#
+# Checking for std
+hist(rz.transform(cervicalCA$std))
+qqnorm(cervicalCA$std)
+qqline(cervicalCA$std)
+cervicalCA$rz_transform_std <- rz.transform(cervicalCA$std)
+#
+# Checking for diagnosis_num
+hist(rz.transform(cervicalCA$diagnosis_num))
+qqnorm(cervicalCA$diagnosis_num)
+qqline(cervicalCA$diagnosis_num)
+cervicalCA$rz_transform_diagnosis_num <- rz.transform(cervicalCA$diagnosis_num)
+#
+# Checking for first_diagnosis_time
+hist(rz.transform(cervicalCA$first_diagnosis_time))
+qqnorm(cervicalCA$first_diagnosis_time)
+qqline(cervicalCA$first_diagnosis_time)
+cervicalCA$rz_transform_first_diagnosis_time <- rz.transform(cervicalCA$first_diagnosis_time)
+#
+# Checking for last_diagnosis_time
+hist(rz.transform(cervicalCA$last_diagnosis_time))
+qqnorm(cervicalCA$last_diagnosis_time)
+qqline(cervicalCA$last_diagnosis_time)
+cervicalCA$rz_transform_last_diagnosis_time <- rz.transform(cervicalCA$last_diagnosis_time)
+
+```
+
+Here I export the clean the data to an external file so that I can analyze the data. I have already exported this file so I put the code as a comment.
+
+```{r export, echo=TRUE}
+#
+# Writing export file
+# write.csv(cervicalCA,"/Users/advai/Documents/DSFS/ccdataMod.csv")
+
+```
+
+## Loadin the Clean Data
+
+I do the same steps to prepare the work space, load the data, and look at the data.
+
+```{r newSetUp, echo=TRUE}
+#
+# clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+#
+# install and load libraries
+library(tidyverse)
+library(stringr)
+source("myfunctions.R")
+#
+# load clean Cervical cancer data
+cervicalCA <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\ccdataMod.csv",header=T, na.strings=c("?"))
+#
+# looking at the data
+names(cervicalCA)
+summary(cervicalCA)
+str(cervicalCA)
+dim(cervicalCA)
+class(cervicalCA)
+glimpse(cervicalCA)
+head(cervicalCA)
+tail(cervicalCA)
+
+```
+
+## Data Analysis: Box Plots
+
+I create a few box plots to analyze the measures of spread for a few variables. I chose to work with age, sexual partners, first intercourse, and pregnancies. These variables are numerical, as opposed to most of the other variables in the data set that are Boolean. Age is important because it gives the data scientist an idea of the ages associated with cervical cancer symptoms and risks. By analyzing the number of sexual partners, doctors can assess the importance of sexual partners as a risk factor for cervical cancer and other similar diseases. First intercourse data gives doctors an idea of how early on women are exposed to HPV. This gives them a time frame to work with when planning prevention. Pregnancy data helps data scientists further analyze the spread of HPV. Knowing the rate of perinatal transmission, data scientists can further examine the spread of this disease as it persists in our population.
+
+```{r boxplots, echo=TRUE}
+#
+# Basic boxplots
+boxplot(cervicalCA$age, horizontal = TRUE, main = "Age Box Plot", xlab = "Age in Years")
+quantile(cervicalCA$age)
+hist(cervicalCA$rz_transform_age)
+# This is included because it tells us that most of 
+# the women that were studied were relatively young 
+# with some older women as outliers.  
+#
+boxplot(cervicalCA$sexual_partners, horizontal = TRUE, main = "Sexual Partners Box Plot", xlab = "Number of Sexual Partner")
+quantile(cervicalCA$sexual_partners)
+#
+# This boxplot is included because it tells us that 
+# most of the women had a few sexual partners, with a
+# few outliers with many sexual partners. Since the 
+# main cause of Cervical cancer is HPV (an STD), it
+# only makes sense that more sexual partners increases
+# the likelihood of transmission.
+#
+boxplot(cervicalCA$first_intercourse, horizontal = TRUE, main = "First Intercourse Box Plot", xlab = "Age of First Intercourse in Years")
+quantile(cervicalCA$first_intercourse)
+#
+# This box plot is included because it tells us that
+# most women in this dataset became sexually active
+# relatively early (shortly after puberty), 
+# exposing them to stds early on in their lives.
+#
+boxplot(cervicalCA$pregnancies, horizontal = TRUE, main = "Pregnancies Box Plot", xlab = "Number of Pregnancies")
+quantile(cervicalCA$pregnancies)
+#
+# This box plot is included because it gives us an
+# idea of the perinatal spread of HPV
+```
+
+## Pairwise Correlation Plot
+
+The pairwise correlation plot gives a brief overview of possible correlation between different variables. Here I look at age, sexual partners, first intercourse, and pregnancies to see if I can extrapolate any correlative relationships.
+```{r pairwise, echo=TRUE}
+#
+# Pairwise correlation plot
+pairs(~cervicalCA$age + cervicalCA$sexual_partners + cervicalCA$first_intercourse + cervicalCA$pregnancies, upper.panel = panel.cor, diag.panel = panel.hist)
+#
+# This plot shows possible correlation between the
+# variables age, sexual partners, first intercourse,
+# and pregnancies. The correlation coefficients 
+# a moderate positive linear relationship between age
+# and pregnancies. The coefficients also suggest a
+# weak positive linear relationship between age and
+# first sexual intercourse. The other coefficients
+# don't show defensible relationships. 
+
+
+```
+
+
+## Linear Regression
+
+Here I perform a linear regression of age and pregnancies. Based on the plot, pregnancies tend to increase with age, showing that many women may be passing HPV to their children. Also, the fact that mostly HPV can stay dormant for years supports the fact that women may unknowingly spread the disease to their children. 
+
+```{r linearRegression, echo=TRUE}
+#
+# Linear regression of age and pregnancies
+plot(cervicalCA$age~cervicalCA$pregnancies, 
+     main="Pregnancies vs. Age", 
+     xlab="Pregnancies", ylab="Age (in years)")
+fitline <- lm(cervicalCA$age~cervicalCA$pregnancies)
+abline(fitline)
+summary(fitline)
+
+
+```
+
+
+## Bayesian Information Criterion (BIC) Analysis
+
+BIC analysis allows me to determine causation between any variables. I use it here to check for causation between age and hormonal contraceptives time. I first measure the BIC score of the target to itself, then measure it against age. If the second score is 10 less than the first score, than there is likely to be a causal relationship between the two variables. Here I determine that age likely causes people to use hormonal contraceptives for a longer time.
+
+```{r BICScore, echo=TRUE}
+#
+# BIC modeling for age -> hormonal contraceptives time
+BIC(lm(cervicalCA$hormonal_contraceptives_time~1)) # 4644
+BIC(lm(cervicalCA$hormonal_contraceptives_time~cervicalCA$age)) # 4570
+# Causal
+
+```
+
+## Separating Data
+
+Here I separate the data based on a low number of sexual partners to examine patterns within just this group of people. I compare the BIC scores of condylomatosis and the diagnosis number and determine that it is causal. I then compare the BIC scores of HIV and the diagnosis number. Though this relationship is causal, it isn't as strong as the previous model because the BIC score difference is less. This makes sense because condylomatosis is much easier to diagnose than HIV, especially among people with low sexual parters (knowing that having low sexual partners decreases the risk of STD transmission).
+
+```{r separating, echo=TRUE}
+#
+# Separating based on a low number of sexual partners
+lowSexualPartners <- filter(cervicalCA, sexual_partners <= median(cervicalCA$sexual_partners))
+#
+# BIC modeling for condylomatosis -> diagnosis num for those
+# with low sexual partners
+BIC(lm(lowSexualPartners$diagnosis_num~1)) # 248
+BIC(lm(lowSexualPartners$diagnosis_num~lowSexualPartners$condylomatosis)) # -149
+# Causal
+# 
+# BIC modeling for hiv -> diagnosis num for those
+# with low sexual partners
+BIC(lm(lowSexualPartners$diagnosis_num~1)) # 248
+BIC(lm(lowSexualPartners$diagnosis_num~lowSexualPartners$hiv)) # 32
+#
+# Causal, but less than condylomatosis which hints at
+# less recognition of hiv than condylomatosis. This
+# makes sense because the group of people have less
+# sexual partners, making diagnosis less common.
+
+
+```
+
+## More Separating Data
+
+Here I separate the data based on whether the person has an STD. Again, I do this to analyze patters within this subset of people. Here I'm analyzing the causal relationship between HPV and a change in cancer. Based on the decrease BIC score difference, I determined that there is a strong causal relationship between these two variables. This makes sense since almost all of those who have cervical cancer developed their cancer from an HPV infection.
+
+```{r separateSTD, echo=TRUE}
+# 
+# Separating based on having an std
+peopleWithSTDs <- filter(cervicalCA, std == TRUE)
+#
+# BIC modeling for hpv -> dx_cancer
+# for people with stds
+BIC(lm(peopleWithSTDs$dx_cancer~1)) # -59
+BIC(lm(peopleWithSTDs$dx_cancer~peopleWithSTDs$hpv)) # -5638
+# Causal
+
+```
+
+To assess the danger of detecting HPV I made this pairwise plot to measure the correlation between HPV and the labs done to detect cervical cancer. This plot shows that HPV is generally not correlated with the cervical cancer tests, making it difficult for doctors to detect HPV when trying to diagnose cervical cancer.
+
+```{r HPVpairwise, echo=TRUE}
+#
+# Pairwise plot of test results from people with stds with hpv.
+pairs(~peopleWithSTDs$hpv + peopleWithSTDs$hinselmann + peopleWithSTDs$schiller + peopleWithSTDs$cytology + peopleWithSTDs$biopsy, upper.panel = panel.cor, diag.panel = panel.hist)
+# This shows that hpv generally goes unnoticed by these tests.
+# Also the tests are correlated with each other (with the
+# exception of cytology and hinselmann).
+
+
+```
+
+
+To further prove a lack of correlation between HPV and the cervical cancer tests, I designed a multiple linear model which produces a P value. This P value is used to assess the potential for a correlative relationship. The calculated P value was 0.97 which further proves that the tests were not statistically significant enough to support a correlative relationship
+
+```{r multifit, echo=TRUE}
+# Multifit of the tests based on hpv
+multifit <- lm(peopleWithSTDs$hpv ~ peopleWithSTDs$hinselmann + peopleWithSTDs$schiller + peopleWithSTDs$cytology + peopleWithSTDs$biopsy)
+summary (multifit)
+# 
+# The P value of 0.97 shows that the 
+# tests are not statistically significant enough
+# to prove correlation.
+#
+# EOF (End of File)
+
+```
+
+
+## Work Cited
+
+“Basic Information about Cervical Cancer.” Centers for Disease Control and Prevention, Centers for Disease Control and Prevention, 12 Jan. 2021, www.cdc.gov/cancer/cervical/basic_info/index.htm. 
+
+“Cervical Biopsy.” Johns Hopkins Medicine, John Hopkins Medicine, 2021, www.hopkinsmedicine.org/health/treatment-tests-and-therapies/cervical-biopsy. 
+
+“Cervical Cancer - Symptoms and Signs.” Cancer.Net, 26 Feb. 2021, www.cancer.net/cancer-types/cervical-cancer/symptoms-and-signs. 
+
+“Cervical Cancer Statistics: Key Facts about Cervical Cancer.” American Cancer Society, 2021, www.cancer.org/cancer/cervical-cancer/about/key-statistics.html. 
+
+“Cervical Cancer.” Mayo Clinic, Mayo Foundation for Medical Education and Research, 17 June 2021, www.mayoclinic.org/diseases-conditions/cervical-cancer/symptoms-causes/syc-20352501. 
+
+Ih-Acr. “Patient Education Library.” The Angeles Clinic, The Angeles Clinic, 2021, www.theangelesclinic.org/Home/ResearchClinicalTrials/PatientEducationLibrary/tabid/19283/ctl/View/mid/35200/Default.aspx?ContentPubID=30. 

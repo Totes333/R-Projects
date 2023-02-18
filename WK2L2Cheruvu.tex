@@ -1,0 +1,360 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Chicago Weather Data Preparation and Analysis},
+  pdfauthor={Advaith Cheruvu},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Chicago Weather Data Preparation and Analysis}
+\author{Advaith Cheruvu}
+\date{8/31/2021}
+
+\begin{document}
+\maketitle
+
+library(rmarkdown) render(``W2L2Cheruvu.Rmd'', output\_format =
+``pdf\_document'') \#\# Abstract
+
+This report analyzes the weather data for Chicago from January 1987 to
+December 2005. The measured weather parameters were daily temperature
+(degrees Celsius), dewpoint (degrees Celsius), amount of PM2.5, amount
+of PM10, amount of ozone, and amount of nitrogen trioxide. Data munging,
+cleaning and normalization were done in order to prepare the dataset for
+further analysis. Histograms of numerical data were made.
+
+\hypertarget{clean-up-and-set-up}{%
+\subsection{Clean up and Set up}\label{clean-up-and-set-up}}
+
+Before importing the data, the workspace must be cleared and the working
+directory must be set up.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Clearing the workspace and setting the working directory}
+\FunctionTok{rm}\NormalTok{(}\AttributeTok{list=}\FunctionTok{ls}\NormalTok{())}
+\FunctionTok{setwd}\NormalTok{(}\StringTok{"/Users/advai/Documents/DSFS"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{obtaining-functions-and-installing-packages}{%
+\subsection{Obtaining Functions and Installing
+Packages}\label{obtaining-functions-and-installing-packages}}
+
+``myfunctions.R'' is necessary for some of the later code to run.
+``tidyverse'' has useful tools that help with plotting and transforming
+data.
+
+\begin{verbatim}
+# install and load libraries
+source("myfunctions.R")
+install.packages("tidyverse")
+library(tidyverse)
+\end{verbatim}
+
+\hypertarget{loading-and-overviewing-the-weather-data}{%
+\subsection{Loading and Overviewing the Weather
+Data}\label{loading-and-overviewing-the-weather-data}}
+
+Before cleaning the data, we must know what the dataset includes. The
+``names'' command shows the names of the columns. The ``summary''
+command gives a short summary of each column. The ``str'' command shows
+the type of data in each column. The ``dim'' command shows the number of
+columns and rows in the dataset. The ``class'' command shows that
+weather is a data frame.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# load weather data}
+\NormalTok{weather }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\AttributeTok{file =} \StringTok{"C:}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Users}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{advai}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Documents}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{DSFS}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{chicago.csv"}\NormalTok{,}\AttributeTok{header=}\NormalTok{T)}
+\CommentTok{\# overview of the data set}
+\FunctionTok{names}\NormalTok{(weather)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "indx"       "city"       "tmpd"       "dptp"       "date"      
+## [6] "pm25tmean2" "pm10tmean2" "o3tmean2"   "no2tmean2"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(weather)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       indx          city                tmpd             dptp       
+##  Min.   :   1   Length:6940        Min.   :-16.00   Min.   :-25.62  
+##  1st Qu.:1736   Class :character   1st Qu.: 35.00   1st Qu.: 27.00  
+##  Median :3470   Mode  :character   Median : 51.00   Median : 39.88  
+##  Mean   :3470                      Mean   : 50.31   Mean   : 40.34  
+##  3rd Qu.:5205                      3rd Qu.: 67.00   3rd Qu.: 55.75  
+##  Max.   :6940                      Max.   : 92.00   Max.   : 78.25  
+##                                    NA's   :1        NA's   :2       
+##      date             pm25tmean2      pm10tmean2        o3tmean2      
+##  Length:6940        Min.   : 1.70   Min.   :  2.00   Min.   : 0.1528  
+##  Class :character   1st Qu.: 9.70   1st Qu.: 21.50   1st Qu.:10.0729  
+##  Mode  :character   Median :14.66   Median : 30.28   Median :18.5218  
+##                     Mean   :16.23   Mean   : 33.90   Mean   :19.4355  
+##                     3rd Qu.:20.60   3rd Qu.: 42.00   3rd Qu.:27.0010  
+##                     Max.   :61.50   Max.   :365.00   Max.   :66.5875  
+##                     NA's   :4447    NA's   :242                       
+##    no2tmean2     
+##  Min.   : 6.158  
+##  1st Qu.:19.654  
+##  Median :24.556  
+##  Mean   :25.232  
+##  3rd Qu.:30.139  
+##  Max.   :62.480  
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(weather)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    6940 obs. of  9 variables:
+##  $ indx      : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ city      : chr  "chic" "chic" "chic" "chic" ...
+##  $ tmpd      : num  31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+##  $ dptp      : num  31.5 29.9 27.4 28.6 28.9 ...
+##  $ date      : chr  "1/1/87" "1/2/87" "1/3/87" "1/4/87" ...
+##  $ pm25tmean2: num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ pm10tmean2: num  34 NA 34.2 47 NA ...
+##  $ o3tmean2  : num  4.25 3.3 3.33 4.38 4.75 ...
+##  $ no2tmean2 : num  20 23.2 23.8 30.4 30.3 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(weather)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6940    9
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(weather)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "data.frame"
+\end{verbatim}
+
+\hypertarget{removing-columns}{%
+\subsection{Removing Columns}\label{removing-columns}}
+
+The index and city data in this dataset is unecessary so we must remove
+those columns.
+
+\begin{verbatim}
+# removing index and city columns
+weather <- select(weather, -1:-2)
+names(weather)
+\end{verbatim}
+
+\includegraphics{C://Users//advai//Documents//DSFS//removingcolumns.png}
+\#\# Renaming Columns Some of the columns are ambigous or hard to read.
+Using these commands, we can rename them to something more readeable.
+
+\begin{verbatim}
+# renaming columns
+colnames(weather)<-c("Temp", "Dewpoint","Date","PM25","PM10","O3","NO3")
+names(weather)
+\end{verbatim}
+
+\includegraphics{C://Users//advai//Documents//DSFS//renamedColumns.png}
+
+\hypertarget{changing-the-date-format}{%
+\subsection{Changing the Date Format}\label{changing-the-date-format}}
+
+The date format is a character instead of a number. using these
+commands, we can change the date to a number, as well as make it more
+readable.
+
+\begin{verbatim}
+# Changing the date format
+weather$Date <- as.Date(weather$Date, format= "%m/%d/%y")
+\end{verbatim}
+
+\hypertarget{normalizing-the-pm-data}{%
+\subsection{Normalizing the PM data}\label{normalizing-the-pm-data}}
+
+The PM data is missing some values and it should be normalized (on a
+scale of 0-1) to prepare it for data analysis. This applies to both
+PM2.5 and PM10.
+
+\begin{verbatim}
+# Normalizing PM25 Data
+weather$PM25 <- ifelse(is.na(weather$PM25), round(mean(weather$PM25, na.rm=TRUE),3), weather$PM25)
+PM25.normalize <- weather$PM25/max(weather$PM25)
+weather$PM25 <- PM25.normalize
+# Normalizing PM10 Data
+weather$PM10 <- ifelse(is.na(weather$PM10), round(mean(weather$PM10, na.rm=TRUE),3), weather$PM10)
+PM10.normalize <- weather$PM10/max(weather$PM10)
+weather$PM10 <- PM10.normalize
+\end{verbatim}
+
+\hypertarget{taking-out-numeric-data}{%
+\subsection{Taking out numeric data}\label{taking-out-numeric-data}}
+
+To prepare the data for analysis, we must provide the columns with
+numeric data. These commands seperate the numerica data (all the columns
+except for the date).
+
+\begin{verbatim}
+# Naming and removing numeric data
+numerics <- weather[,c(1:2,4:7)]
+\end{verbatim}
+
+\hypertarget{observing-correlation}{%
+\subsection{Observing Correlation}\label{observing-correlation}}
+
+This is pairwise correlation which helps to find out which data pairs
+have recognizeable patterns and are worth analyzing further.
+
+\begin{verbatim}
+# Looking at Correlation
+pairs(numerics,upper.panel = panel.cor,diag.panel = panel.hist)
+\end{verbatim}
+
+\includegraphics{C://Users//advai//Documents//DSFS//pairs.png}
+
+\hypertarget{histograms}{%
+\subsection{Histograms}\label{histograms}}
+
+As part of Exploratory Data Analysis (EDA), transformations must be made
+to the data to normalize it and compare it to other data. This
+transformation is the rank z transformation which results in a normal
+distribution. This can be seen for all graphs except for PM25 where the
+correlation is not as strong.
+
+\begin{verbatim}
+# Transformations and histogram plots
+Temp.rz <- rz.transform(weather$Temp)
+hist(Temp.rz)
+Dewpoint.rz <- rz.transform(weather$Dewpoint)
+hist(Dewpoint.rz)
+PM25.rz <- rz.transform(weather$PM25)
+hist(PM25.rz)
+PM10.rz <- rz.transform(weather$PM10)
+hist(PM10.rz)
+O3.rz <- rz.transform(weather$O3)
+hist(O3.rz)
+NO3.rz <- rz.transform(weather$NO3)
+hist(NO3.rz)
+\end{verbatim}
+
+\includegraphics{C://Users//advai//Documents//DSFS//temprz.png}
+\includegraphics{C://Users//advai//Documents//DSFS//dewpointrz.png}
+\includegraphics{C://Users//advai//Documents//DSFS//pm25rz.png}
+\includegraphics{C://Users//advai//Documents//DSFS//pm10rz.png}
+\includegraphics{C://Users//advai//Documents//DSFS//o3rz.png}
+\includegraphics{C://Users//advai//Documents//DSFS//no3rz.png}
+
+\end{document}

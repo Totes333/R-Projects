@@ -1,0 +1,159 @@
+---
+title: "Data Analysis and Study of Melting Point Data"
+author:
+name: Advaith Cheruvu
+affiliation: North Carolina School of Science and Math
+date: "September 14, 2021"
+output:
+pdf_document: default
+abstract: This document provides data analysis and information about melting point data including data cleaning, linear regression, and BIC score comparison analysis.
+---
+
+
+## Introduction
+
+This document goes over the basic data analysis techniques from the article "General Melting Point Prediction Based on a Diverse Compound Data Set and Artificial Neural Networks" by M. Karthikeyan. This dataset deals with various measurements of 4173 compounds. The article discusses the implementation of a "robust and general model for the prediction of melting points." Melting points can be approximated if making the assumption that structurally similar compounds tend to have similar properties. This is assumption that's useful, but is not necessarily accurate. Another prediction of melting points can be made from boiling points, but polymorphisms (the formation of different crystal features in otherwise similar compounds) and phase transitions show that a single compound may not have a only one clearly defined melting point. M. Karthikeyan goes into how the melting point is determined using a variety of properties and variables. The general idea is that melting point is a complex phenomenon and hard to measure without trading off much accuracy. This document will go over the code I used to clean the data, produce the 1st table, perform linear regressions, and BIC score analysis.
+
+
+## Setting up the Workspace
+
+The code used here is for preparing the workspace for data cleaning. This includes cleaning the directory, setting the working directory, loading libraries, and reading melting point data.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+#
+# install and load libraries
+library(tidyverse)
+library(knitr)
+source("myfunctions.R")
+#
+# read mp data
+meltingPoints <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\dirtyMPdata.csv",header=T)
+
+```
+
+
+## Looking at the Data
+
+We must look at the data to see if column names are missing and to view how many rows and columns are in the dataset. 
+
+
+
+```{r setupCleanup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#
+# Looking at the melting points data
+head(meltingPoints)
+names(meltingPoints)
+str(meltingPoints)
+glimpse(meltingPoints)
+summary(meltingPoints)
+dim(meltingPoints)
+```
+
+## Checking for Missing Data
+
+Next, missing data must be accounted for. These commands check for which rows have missing data and then which columns those rows appear in. 
+
+```{r checkingMissingData}
+#
+# Check for missing data
+missingData <- ifelse(complete.cases(meltingPoints) == TRUE, 1, 0)
+paste("There are", dim(meltingPoints)[1]-sum(missingData), "rows with missing data.")
+#
+# Since there is missing data we must check which columns have missing data
+missingDataCol <-colnames(meltingPoints)[apply(meltingPoints, 2, anyNA)]
+paste0("The following columns have missing data: ", missingDataCol)
+```
+
+## Filling in Missing Data
+
+Now knowing that the energy data is numerical, we can replace the missing data with the mean of existing data. I used these commands:
+
+
+```{r replacingData}
+#
+# Replace data with the mean of existing data
+meltingPoints$energy <- ifelse(is.na(meltingPoints$energy), round(mean(meltingPoints$energy, na.rm=TRUE),0), meltingPoints$energy)
+```
+
+## Making a Table of the Distribution
+
+The first table in the article shows the characterization of the 4173 compounds, showing the maximum, minimum, mean, standard deviation, 1st quartile, median, and 3rd quartile of the most important variables. To create this table, I created a vector for each measure of distribution. For example, I created a vector for minimum, containing the minimum of each variable (melting point, molar mass, etc.) as well as a vector for maximum, and so on. I combined these vectors into a data frame called "dataDist". I transposed this data frame so that it matched the format of the table in the article and then renamed the new columns. Also, where the article references the 2nd quartile, I interpreted as the median which is why I used the median function to calculate the values for the median vector. It should be noted that I used the "quantile" command to calculate the 1st and 3rd quartile values, but I decided not to include the command (just the actual values) in this prompt to make this lengthy segment of code slightly more readeable.
+
+```{r creatingTable}
+#
+# Creating vectors for each measure of data distribution
+minimum <- c(round(min(meltingPoints$mp),1), round(min(meltingPoints$molar.mass),1), round(min(meltingPoints$heavy.atoms),1), round(min(meltingPoints$logP),1), round(min(meltingPoints$refractivity), 1), round(min(meltingPoints$dipole.moment),1))
+maximum <- c(round(max(meltingPoints$mp),1), round(max(meltingPoints$molar.mass),1), round(max(meltingPoints$heavy.atoms),1), round(max(meltingPoints$logP),1), round(max(meltingPoints$refractivity), 1), round(max(meltingPoints$dipole.moment),1))
+mean <- c(round(mean(meltingPoints$mp),1), round(mean(meltingPoints$molar.mass),1), round(mean(meltingPoints$heavy.atoms),1), round(mean(meltingPoints$logP),1), round(mean(meltingPoints$refractivity), 1), round(mean(meltingPoints$dipole.moment),1))
+standard.deviation <- c(round(sd(meltingPoints$mp),1), round(sd(meltingPoints$molar.mass),1), round(sd(meltingPoints$heavy.atoms),1), round(sd(meltingPoints$logP),1), round(sd(meltingPoints$refractivity), 1), round(sd(meltingPoints$dipole.moment),1))
+firstQuartile <- c(118, 243.3, 17, 2.2, 6.6, 2.4)
+median <- c(round(median(meltingPoints$mp),1), round(median(meltingPoints$molar.mass),1), round(median(meltingPoints$heavy.atoms),1), round(median(meltingPoints$logP),1), round(median(meltingPoints$refractivity), 1), round(median(meltingPoints$dipole.moment),1))
+thirdQuartile <- c(210.5, 376.5, 27, 4.6, 10.2, 5.5)
+#
+# data frame of data distribution
+dataDist <- data.frame(minimum, maximum, mean, standard.deviation, firstQuartile, median, thirdQuartile)
+dataDist <- t(dataDist)
+colnames(dataDist) <-c("meltingPoint/C", "molecular weight/g/mol", "number of heavy atoms", "SlogP", "molar refractivity/cm3", "dipole moment (AMI)/debye")
+dataDist
+
+```
+
+
+## Linear Regression
+
+A linear regression of the formal charge, volume, and molar refractivity was performed with the melting point as the target. 
+
+```{r linearRegression}
+#
+# linear regression plots
+mpFormalChargeFit <- lm(meltingPoints$mp~meltingPoints$formal.charge)
+plot(meltingPoints$formal.charge, meltingPoints$mp, 
+     main="Plot of Melting Point vs. Formal Charge of a Molecule", xlab = "Formal Charge", ylab = "Melting Point")
+abline(mpFormalChargeFit)
+
+mpVolumeFit <- lm(meltingPoints$mp~meltingPoints$volume)
+plot(meltingPoints$volume, meltingPoints$mp, 
+     main="Plot of Melting Point vs. Volume of a Molecule", xlab = "Volume", ylab = "Melting point")
+abline(mpVolumeFit)
+
+mpRefractivityFit <- lm(meltingPoints$mp~meltingPoints$refractivity)
+plot(meltingPoints$refractivity,meltingPoints$mp, 
+     main="Plot of Melting Point vs. Molar Refractivity of a Molecule", xlab = "Molar Refractivity", ylab = "Melting point")
+abline(mpRefractivityFit)
+```
+
+## Multiple Linear Regression
+
+A multiple linear regression was done, combining charge, volume, and refractivity, targeting melting point.
+
+```{r multifit}
+#
+# Multifit of charge, volume, and refractivty targeting melting point
+multiFit <- lm(meltingPoints$mp~meltingPoints$refractivity+meltingPoints$formal.charge+meltingPoints$volume)
+summary(multiFit)
+#
+# diagnostic plots 
+layout(matrix(c(1,2,3,4),2,2)) 
+plot(multiFit)
+```
+
+## BIC Score Comparison Analysis
+
+Finally, a BIC analysis was done on dipole moment targeting melting point. This is done to check for causation. The BIC score of the dipole moment is 32606 and the BIC score of the dipole moment targeting the melting point is 32557, resulting in a difference of 49. Since this is greater than 10, there is likely to be causation within this relationship.
+```{r BICScore}
+#
+# BIC scores targeted on melting point
+# Question: Do the dipole moment and Melting Point have a causal relationship?
+BIC(lm(meltingPoints$dipole.moment~1))
+BIC(lm(meltingPoints$dipole.moment~meltingPoints$mp))
+#
+# Since the BIC score of the relationship is more 
+# than 10 less than the BIC score of just the dipole
+# moment, then there is likely to be some causation 
+# between dipole moments and melting points
+```

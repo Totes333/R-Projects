@@ -1,0 +1,330 @@
+---
+title: "Data Analysis of Ellerbe Creek"
+author: "Advaith Cheruvu"
+date: "9/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importance of Study
+
+Assessing the water quality of local bodies of water is very important for maintaining safe drinking water, a healthy ecosystem, and preventing environmental damage. This document will focus on the data from Ellerbe Creek which is a tributary of the Neuse River in North Carolina, United States. The Ellerbe creek flows for more than 20 miles through North Durham, eventually draining into the Neuse river. This stream has often considered the most polluted stream in The Triangle and a watershed improvement plan was put in place in 2010. Knowledge about specific water quality indicators would be very helpful in determining relationships between indicators as well as the overall environmental health of the stream. This shows that studying the water quality data of this stream can help local conservation efforts focus on specific indicators and assess the current damage of the stream. The Ellerbe Creek data I will be analyzing has 11 indicators that were measured.
+
+
+## Overview Water Temperature
+
+Water temperature affects a multitude of other water quality factors. Firstly, a higher water temperature means that there are fewer dissolved gasses. This can reduce the available oxygen for animals as well as carbon dioxide for plants. Also, some animals and plants cannot survive under temperatures that are too hot or cold. These animals are sensitive to temperature changes, showing the importance of maintaining a normal temperature. Also, since water a high heat capacity, it's temperature doesn't change very easily, which has what allowed some animals and plants to adapt to the nearly constant water temperature.
+
+## Overview of Pressure
+
+Pressure is a result of the weight of the above air. This force often causes stream flow and, subsequently, turbidity to increase. Pressure can make some animals feel unpleasant, causing them to migrate or move if there is long term discomfort. Pressure can be constant or infrequently change based on the environment. This causes the stressors to take form either individually or in combination. Overall, pressure helps maintain a healthy ecosystem. 
+
+## Stream Depth
+
+Stream depth affect characteristics of water quality because of the effect stream depth has on the temperature. For example, a deeper stream would likely be cooler than a more shallow stream since the sunlight cannot penetrate to the deepest layers of the stream as easily. This helps determine the healthy temperature range for the animals and plants in a stream. Also, streams with a constant depth likely flow slower than streams with a changing depth since there is nothing to slow down the stream.
+
+## Stream flow
+
+The flow of a stream is directly related to the amount of water moving from the watershed to a stream channel. This is affected by weather, seasons, vegetation. Faster flowing streams will likely be less affected by pollution than small slower streams. Also, the flowing speed of a stream determines the kinds of organisms that can live in the stream (since some prefer faster and others prefer slower). Lastly, fast moving streams likely have higher levels of dissolved oxygen than slower streams since faster moving streams are better aerated when they are flowing.
+
+## Dissolved Oxygen
+
+Dissolved oxygen is important for all aquatic animals to breathe. Dissolved oxygen levels are caused by organic material levels, season changes, temperature, and the flow of the water. Most organisms have a dissolved oxygen tolerance range. For levels below 3 mg/L some sensitive animals usually migrate away. Bodies of water with dissolved oxygen levels below 1 mg/L are hypoxic and typically devoid of life.
+
+## pH: Acidity
+
+pH is a measure of how acidic/basic water is, going from zero to fourteen. Water is usually at 7, meaning that it is neutral, with drinking water being anywhere between 6.5 and 8.5. Again, there are organisms that are very sensitive to pH changes. Changes in population of these organisms indicate major changes in the ecosystem.
+
+
+## NO3: Nitrate
+
+Nitrogen is cycled through the ecosystem through the nitrogen cycle. This cycle creates NO3 which can cause damage in high quantities. NO3 is a fertilizer for some species, favoring those species and decreasing the biodiversity of an ecosystem. NO3, in high quantities, also has the effect of acidifying water bodies, causing further ecosystem damage. Denitrifying bacteria naturally cycle nitrogen, so it is important reduce the production of NO3 and allow these bacteria to cycle nitrogen.
+
+## Turbidity
+
+Turbidity, measured in units of Nephelometric Turbidity Units (NTU), is the measure of the relative clarity of water. A higher turbidity means that the water is more cloudy and opaque while a lower turbidity means that the water is more transparent and clear. Turbidity is mostly caused by suspended particles in the water. This means that higher particulate matter more greatly affects the light penetration and ecological productivty. Plants at the deepest part of a body of water cannot effectively photosynthesize if the turbidity is too high. 
+
+## Conductance
+
+Conductance is the measurement of water to pass an electric current. This can be affected by dissolved salts and inorganic chemicals. As salinity increases, conductivity also decreases, but most organic compounds hinder the conductivity of the water. Also, warmer water has a higher conductivity than cooler water. Each body of water tends to have a range of conducitivaty that can be used a baseline for comparison analysis.
+
+## NH4: Ammonia
+
+Ammonia is another form of nitrogen that exists in the ecosystem. Unlike NO3, ammonia is not a nutrient, but instead causes damage to aquatic organisms. Ammonia, in high levels can become a toxin to aquatic organisms. This can cause toxic buildup in internal tissues and blood, potentially causing death. Ammonia is greatly affected by pH and temperature. Again, we must allow the nitrogen cycle to filter out ammonia to maintain a constant healthy level.
+
+## Saturation
+
+Saturation is the measure of dissolved gasses in a body of water. This is affected by the temperature of the water, since excited water molecules can hold more gasses. Gas saturation levels must remain relatively constant in order to avoid certain risks. If there isn't enough dissolved oxygen, then there is likely eutrophication in the body of water.
+
+
+## Setting up Workspace and Installing Packages
+The code below shows the preparation of the workspace and cleaning up the environment, as well as installing and loading packages.
+
+```{r install, echo=TRUE}
+#
+# clean up and set up
+rm(list=ls())
+setwd("/Users/advai/Documents/DSFS")
+#
+# install and load libraries
+library(tidyverse)
+library(ggdendro)
+library(ggalt)
+library(plotluck)
+library(gridExtra)
+source("myfunctions.R")
+#
+```
+
+## Loading and Looking at Water Quality Data
+After reading the water quality data into R studio, I can look at it using a variety of commands. The most important commands are "summary" which reports the quartile data, "str" which reports the type of data in the dataframe, and "names" which reports the names of the columns of data. 
+
+
+```{r wqdata, echo=TRUE}
+#
+# load wq data
+wq <- read.csv(file = "C:\\Users\\advai\\Documents\\DSFS\\ellerbee.csv",header=T)
+#
+# looking at the data
+names(wq)
+summary(wq)
+str(wq)
+dim(wq)
+class(wq)
+glimpse(wq)
+head(wq)
+
+```
+
+As you can see, these commands provide useful information about the quality of the data as well as what the data is.  
+
+## Replacing Column Names
+Based on the "names" command from earlier, the column names of the data in this dataset is very ambiguous. By using a "dplyr" command "rename" we can rename the columns so that it is easier to read.
+
+```{r renamecolumns, echo=TRUE}
+#
+# rename column
+names(wq) <- c("Water_temperature", "Pressure","Stream_depth", "Cubic_flow_sec", "Dissolved_oxygen", "pH", "NO3", "Turbidity", "Conductance", "NH4", "Saturation")
+
+
+```
+
+
+```{r renamedcolumns, echo=TRUE}
+#
+# renamed columns
+names(wq)
+```
+
+## Checking for Missing Data
+
+Most columns have missing data, either as "NA" or data that just doesn't make sense. I can check for missing data using the commands below which print the rows with missing data. After knowing that I have missing data, I can run the command below which tells me which columns have missing data.
+
+```{r wqsummary1, echo=TRUE}
+#
+# Check for missing data
+clean <- ifelse(complete.cases(wq) == TRUE, 1, 0)
+paste("There are", dim(wq)[1]-sum(clean), "rows with missing data.")
+#
+# Find which columns have missing data
+missingDataCol <-colnames(wq)[apply(wq, 2, anyNA)]
+paste0("The following columns have missing data: ", missingDataCol)
+
+```
+
+## Replacing Missing Data
+
+I am going to replace the missing values with 0 since there isn't enough data to confidently replace the missing data with the mean.
+
+```{r replaceData, echo=TRUE}
+# replace columns of missing data with 0
+wq[is.na(wq)] <- 0
+
+```
+
+
+## Box Plots
+
+I will be creating 8 graphics showing the relationship between a few variables in this dataset. First, I'll be creating a box plot to show the relationship between the flow of the stream and the turbidity
+
+```{r bp1, echo=TRUE}
+# cfs vs Turbidity boxplot
+bp1 <- ggplot(wq, aes(group = Stream_depth,         # groups the data
+                          x=Cubic_flow_sec,           # sets the x
+                          y=Turbidity))+              # sets the y
+  geom_boxplot() +                                    # tells R to create a boxplot
+  xlab("Cubic flow per second") +                     # labels the x axis
+  ylab("Turbidity (NTU)") +                                    # labels the y axis
+  ggtitle("Boxplot of Cubic Flow per Second\nvs. Turbidity") +      # labels the plot
+  theme(plot.title = element_text(hjust = 0.5))       # centers the title
+
+# Prints the plot
+bp1
+
+```
+
+This box plot is important to the analysis because this relationship reveals a few patterns. Firstly, the turbidity of the slow moving streams is more varied than the turbidity of the other streams, indicating that there is a great imbalance within the streams at Ellerbe creek. Also, the fact that the fast moving streams generally tend to increase in turbidity shows that the health of the fast moving streams is not in good standing. Conservation efforts should focus on the fast moving streams with some highly turbid slow moving streams. Next, I'll create another box plot showing the relationship between NH4 and pH.
+
+```{r bp2, echo=TRUE}
+# Boxplot of NH4 vs. pH
+
+
+bp2 <- ggplot(wq, aes(group = Stream_depth,         # groups the data
+                     x=NH4,           # sets the x to population
+                     y=pH))+              # sets the y to deaths
+  geom_boxplot() +                                    # tells R to create a boxplot
+  xlab("NH4 content") +                     # labels the x axis
+  ylab("pH") +                                    # labels the y axis
+  ggtitle("Boxplot of\n NH4 content vs. pH") +      # labels the plot
+  theme(plot.title = element_text(hjust = 0.5))
+
+#
+# Prints the plot
+bp2
+
+```
+
+This box plot is important for the analysis because it shows the high range in NH4 content across Ellerbe creek, as well as the varying pH. The pH of the streams both above and below 7, meaning that they are either too basic or acidic. Also, the high range of NH4 content shows that some streams are extremely more polluted than others. This shows that conservation efforts should focus on NH4 content within the streams of Ellerbe Creek.
+
+## Scatterplots
+
+This scatter plot shows the relationship between water temperature and dissolved oxygen.
+
+```{r sp1, echo=TRUE}
+#
+# Water Temperature vs. Dissolved Oxygen with NO3
+
+sp1 <-ggplot(wq, aes(
+  x=Water_temperature,               # sets the x to adjusted death rate
+  y=Dissolved_oxygen,          # sets the y to standard error of the adjusted death rate
+  scale_color_gradient(low = "darkblue", high = "deepskyblue")))+ # creates the color gradient
+  xlab("Water Temperature (C)") +                    # labels the x axis
+  ylab("Dissolved Oxygen (mg/L)") +  # labels the y axis
+  ggtitle("Scatterplot of \nTemperature vs. Dissolved Oxygen")+ # labels the plot
+  theme(plot.title = element_text(hjust = 0.5))+   # centers the title
+  geom_point(aes(color=NO3))                # colors the plot based on NO3
+
+# Prints the plot
+sp1
+
+```
+
+This scatter plot is important to the analysis because it shows some key indicators of aquatic environment health. Though some streams have high dissolved oxygen, others are far below. This coupled with the fact that some of these streams have high NO3 indicate some level of eutrophication. Even if the water temperature is high, the water isn't holding as much dissolved oxygen as the cooler streams. This next scatter plot shows the relationship between turbidity and dissolved oxygen.
+
+```{r sp2, echo=TRUE}
+#
+# Turbidity vs. Dissolved Oxygen with pH
+sp2 <-ggplot(wq, aes(
+  x=Turbidity,              
+  y=Dissolved_oxygen,          
+  scale_color_gradient(low = "darkblue", high = "deepskyblue")))+ 
+  xlab("Turbidity (NTU)") +                    
+  ylab("Dissolved Oxygen (mg/L)") +  
+  ggtitle("Scatterplot of \nTurbidity vs. Dissolved Oxygen")+ 
+  theme(plot.title = element_text(hjust = 0.5))+   # centers the title
+  geom_point(aes(color=pH))                # colors the plot based on pH
+
+# Prints the plot
+sp2
+
+```
+
+This scatter plot is important to the analysis because shows turbidity and pH in addition to the the dissolved oxygen concentration from the other scatter plot. This plot indicates that most streams are on the borderline between healthy and slightly unhealthy with some streams being extremely turbid. Also, the streams that are more central in terms of dissolved oxygen tend to have a higher pH. Conservation efforts should focus on these few select streams the most and work their way across all the streams in Ellerbe creek.
+
+## Linear Regression Plots
+
+This linear regression plot shows the relationship between water temperature and dissolved oxygen.
+
+```{r lm1, echo=TRUE}
+# Water Temperature vs. Dissolved Oxygen
+
+lm1 <- ggplot(wq, aes(x = Water_temperature, y = Dissolved_oxygen)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") +
+  xlab("Water Temperature (C)") +                    
+  ylab("Dissolved Oxygen (mg/L)") +  
+  ggtitle("Linear Regression of \nWater Temperature vs. Dissolved Oxygen")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Prints the plot
+lm1
+```
+
+This linear regression shows the relationship between dissovled oxygen and water temperature. Prior research indicated that these two indicators should be related, and the Ellerbe creek data supports this, despite the relatively few data points. This graph also shows that many of the streams are warm and have low dissolved oxygen, which could damage the ecosystem. This next linear regression plot shows the relationship between water temperature and NO3
+
+```{r lm2, echo=TRUE}
+# Linear regression of Water Temperature vs. NO3
+lm2 <- ggplot(wq, aes(x = Water_temperature, y = NO3)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") +
+  xlab("Water Temperature (C)") +                    
+  ylab("NO3 (mg/L)") +  
+  ggtitle("Linear Regression of \nWater Temperature vs. NO3")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Prints the plot
+lm2
+```
+
+This linear regression plot is important for the analysis because it highlights the lack of relationship between water temperature and NO3. Unlike with dissolved oxygen, NO3 appears to have no relationship with with the water temperature since the data points are too spread out. Conservationists can focus on the few streams with extremely high NO3 and temperature though.
+
+## Violin Plots
+
+This violin plot shows the relationship between 
+water temperature and pressure.
+
+```{r vp1, echo=TRUE}
+# Water temperature vs pressure 
+vp1 <- ggplot(wq, aes(x=Water_temperature,                              # sets the x to population
+                      y=Pressure)) +                               # sets the y to deaths
+  xlab("Water Temperature (C)") +                              # labels the x axis
+  ylab("Pressure (mmHG)") +                                             # labels the y axis
+  ggtitle("Violin Plot of Water Temperature\n vs Pressure") +           # labels the plot
+  theme(plot.title = element_text(hjust = 0.5))+               # centers the title
+  geom_violin()                                             # tells R to create a boxplot on top of the violin plot
+
+# Prints the plot
+vp1
+
+```
+
+
+This violin plot is important for the analysis because it shows the relationship between pressure and water temperature. This graph indicates that most pressure values occur at a wide variety of temperatures. These changes in pressure and temperature can harm wildlife and are likely connected to other factors. This next violin plot shows the relationship between turbidity and conductance.  
+
+```{r vp2, echo=TRUE}
+# Turbidity vs Conductance
+vp2 <- ggplot(wq, aes(x=Turbidity,                              # sets the x to population
+                      y=Conductance)) +                               # sets the y to deaths
+  xlab("Turbidity (NTU)") +                              # labels the x axis
+  ylab("Conductance (Microsiemens per cm)") +                                             # labels the y axis
+  ggtitle("Violin Plot of Turbidity\n vs Conductance") +           # labels the plot
+  theme(plot.title = element_text(hjust = 0.5))+               # centers the title
+  geom_violin()                                             # tells R to create a boxplot on top of the violin plot
+
+# Prints the plot
+vp2
+#
+# EOF (End of File)
+```
+
+This violin plot is important for the analysis because it highlights the relationship between turbidity and conductance. The plot indicates that most conductance values are lower with high conductance values becoming more rare in relation to the turbidity. High turbidity that decreases the conductance could indicate that the suspended matter is organic and resists electrical current. This eliminates the possibility of the suspended matter being salts or any other substance that increases electrical current. 
+
+## Work Cited
+“5.1 Stream Flow.” EPA, Environmental Protection Agency, 6 Mar. 2012, archive.epa.gov/water/archive/web/html/vms51.html. 
+
+Chase, Valerie. “Nitrate in Ecosystems and Drinking Water.” Carolina.com, Carolina Biological Supply Company, 2021, www.carolina.com/teacher-resources/Interactive/nitrate-in-ecosystems-and-drinking-water/tr10810.tr. 
+
+“Ellerbe Creek.” Wikipedia, Wikimedia Foundation, 18 June 2020, en.wikipedia.org/wiki/Ellerbe_Creek. 
+
+“Freshwater Multiple Stressor Toolbox.” Pressures - Freshwater Information, 2021, fis.freshwatertools.eu/index.php/infolib/pressures.html. 
+
+“Indicators: Conductivity.” EPA, Environmental Protection Agency, 1 June 2021, www.epa.gov/national-aquatic-resource-surveys/indicators-conductivity. 
+
+Kreger, Chris. Water Quality, 10 Nov. 2004, www.cotf.edu/ete/modules/waterq3/WQassess4d.html. 
+
+“Turbidity and Water.” Turbidity and Water, U.S. Department of the Interior, 2021, www.usgs.gov/special-topic/water-science-school/science/turbidity-and-water?qt-science_center_objects=0#qt-science_center_objects. 
+
+Water Quality, waterquality.wordpress.ncsu.edu/. 
